@@ -1,0 +1,116 @@
+unit Data;
+
+interface
+
+uses DiscretSet, Chart, PointRec, SysUtils, Classes;
+
+type
+
+TData=class(TDiscretSet)
+ private
+   points : TPointsList;
+   function GetCount:integer;
+   function GetPoints:TPointsList;
+ public
+   constructor Create(chart:TChart);
+   destructor Destroy; override;
+   procedure AddPoint (x,y :real);
+   property Count:integer read GetCount;
+   procedure Clear;
+   procedure Save(filePath:string); override;
+   procedure Load(filePath:string); override;
+   procedure BuildLine; override;
+   property PointsList : TPointsList read GetPoints;
+end;
+
+implementation
+
+constructor TData.Create(chart:TChart);
+begin
+     inherited Create(chart);
+     SetLength(self.points,0);
+     id := 0;
+end;
+
+
+destructor TData.Destroy;
+begin
+  inherited Destroy;
+end;
+
+
+procedure TData.AddPoint (x,y :real);
+begin
+     SetLength(self.points, Length(self.points)+1);
+     self.points[High(self.points)] := TPointRec.Create(x,y);
+end;
+
+
+function TData.GetCount:integer;
+begin
+  GetCount := Length(self.points);
+end;
+
+
+procedure TData.Clear;
+begin
+     SetLength(self.points,0);
+end;
+
+
+procedure TData.Save(filePath:string);
+var f: TFileStream;
+    i: integer;
+    val : real;
+begin
+     f := TFileStream.Create(filePath, fmCreate);
+     for i:=0 to Length(self.points)-1 do
+      begin
+           val := self.points[i].X;
+           f.WriteBuffer(val, sizeof(real));
+           val := self.points[i].Y;
+           f.WriteBuffer(val, sizeof(real));
+      end;
+     f.Free;
+end;
+
+
+procedure TData.Load(filePath:string);
+var f: TFileStream;
+x,y:real;
+begin
+     f := TFileStream.Create(filePath, fmOpenRead);
+     while f.Position < f.Size do
+     begin
+          f.ReadBuffer(x, sizeof(real));
+          f.ReadBuffer(y, sizeof(real));
+          AddPoint(x,y);
+     end;
+end;
+
+
+procedure TData.BuildLine;
+var x,y:array of real;
+      i:integer;
+begin
+     if (Not self.Plotted)
+     then begin
+      self.plottedField := true;
+      SetLength(x, Length(self.points));
+      SetLength(y, Length(self.points));
+      for i:= 0 to Length(self.points)-1 do
+       begin
+        x[i] := self.points[i].X;
+        y[i] := self.points[i].Y;
+       end;
+      self.id := self.Chart.AddLine(x,y);
+      self.Chart.Invalidate;
+     end
+end;
+
+function TData.GetPoints:TPointsList;
+begin
+     GetPoints := points;
+end;
+
+end.

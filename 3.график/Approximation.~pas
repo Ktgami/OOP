@@ -1,0 +1,59 @@
+unit Approximation;
+
+interface
+
+ uses  DiscretSet, Data, Chart;
+
+ type
+
+ TApproximation= class (TDiscretSet)
+ private
+   Actual : boolean;
+   Data : TData;
+ public
+   Constructor Create (Data : TData; Chart:TChart);
+   Destructor Destroy; override;
+   Procedure Approximate;
+   procedure BuildLine; override;
+ end;
+
+implementation
+
+ Constructor TApproximation.Create (Data:TData; Chart:TChart);
+ begin
+   inherited Create(chart);
+   self.Data := Data;
+   Actual := false;
+ end;
+
+ Destructor TApproximation.Destroy;
+ Begin
+ end;
+
+ Procedure TApproximation.Approximate;
+ Begin
+ end;
+
+procedure TApproximation.BuildLine;
+var x,y:array of real;
+      i, N:integer;
+begin
+     if (Not self.Plotted)
+     then begin
+      N := 10;
+      self.plottedField := true;
+      SetLength(x, N);
+      SetLength(y, N);
+      for i:= 0 to N-1 do
+       begin
+        x[i] := i;
+        y[i] := sin(i);
+       end;
+      self.id := ChartInstance.AddLine(x,y);
+      ChartInstance.Invalidate;
+      x := nil;
+      y := nil;
+     end;
+end;
+
+end.
