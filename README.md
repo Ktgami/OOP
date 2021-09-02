@@ -1,2 +1,2 @@
 # OOP
-OOP using Delphi
+Learning progets with OOP using Delphi
