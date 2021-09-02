@@ -1,2 +1,2 @@
 # OOP
-Learning projects with OOP using Delphi
+Учебные проекты по ООП с Delphi
