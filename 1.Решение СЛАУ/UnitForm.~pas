@@ -1,0 +1,51 @@
+unit UnitForm;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, UnitGetSolution, StdCtrls, Menus, Grids, SizeFormUnit;
+
+type
+  TFormSLAU = class(TForm)
+    CoeffTable: TStringGrid;
+    MainMenu: TMainMenu;
+    SolutionTable: TStringGrid;
+    LabelError: TLabel;
+    LabelErrorValue: TLabel;
+    ffff1: TMenuItem;
+    New1: TMenuItem;
+    Open1: TMenuItem;
+    Save1: TMenuItem;
+    Exit1: TMenuItem;
+    System2: TMenuItem;
+    Size1: TMenuItem;
+    Random1: TMenuItem;
+    Zeroing1: TMenuItem;
+    Solve1: TMenuItem;
+    procedure Exit1Click(Sender: TObject);
+    procedure New1Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FormSLAU: TFormSLAU;
+
+implementation
+
+{$R *.dfm}
+
+procedure TFormSLAU.Exit1Click(Sender: TObject);
+begin
+  Close;
+end;
+
+procedure TFormSLAU.New1Click(Sender: TObject);
+begin
+  SizeForm.ShowModal;
+end;
+
+end.

@@ -1,0 +1,202 @@
+unit UnitGetSolution;
+
+interface
+uses stream;
+
+type
+
+TSLAU = class(TObject)
+  private
+    A  : array of array of real;
+    X : array of real;
+    InStream : TInStream;
+    OutStream : TOutStream;
+    _Size   : integer;
+    procedure SetSize(NewSize:integer);
+    function  GetData(i,j:integer):real;
+    procedure SetData(i,j:integer; z:real);
+    function  CalcError:real;
+//    function GetSolution(i : integer) : real;
+//    procedure change(i,j:integer);
+  public
+    constructor Create(NewSize:integer);
+    property    Size:integer read _Size write SetSize;
+    property    Data[i,j:integer] : real read GetData write SetData; default;
+//    property    Solved:boolean read _Solved;
+    function    Gauss:real;
+//    property    Solution[i:integer]:real read GetSolution;
+    procedure   Save(FName:string);
+//    procedure   Load(FName:string);
+    procedure   Loadfromtext(FName:string);
+//    function    Solve:byte;
+    destructor  Destroy;
+end;
+
+implementation
+
+
+constructor TSLAU.Create(NewSize:integer);
+begin
+   inherited Create;
+   SetSize(NewSize);
+end;
+
+destructor TSLAU.Destroy;
+begin
+   Finalize(A);
+   Finalize(X);
+   inherited destroy;
+end;
+
+procedure TSLAU.SetSize(NewSize:integer);
+var
+  i : integer;
+begin
+  if NewSize = _Size then exit;
+  setlength(A, NewSize);
+  setlength(x, NewSize);
+  for i:=0 to NewSize-1 do SetLength(A[i], NewSize+1);
+  _Size := NewSize;
+end;
+
+function TSLAU.GetData(i,j:integer):real;
+begin
+  GetData := 0;
+  if (i > _size-1) or (j > _size-1) or (i < 0) or (j < 0) then exit;
+  GetData := A[i,j];
+end;
+
+procedure TSLAU.SetData(i,j:integer; z:real);
+begin
+  if (i > _size-1) or (j > _size-1) or (i < 0) or (j < 0) then exit;
+  A[i,j] := z;
+end;
+
+
+
+//Запись/загрузка из файла
+/////////////////////////////////
+procedure TSLAU.Save(FName:string);
+var
+  f : text;
+  i : integer;
+  RSize : integer;
+begin
+  AssignFile(f, FName);
+  Rewrite(f);
+
+  if gauss >=0 then
+    begin
+      for i := 0 to _Size-1 do
+      begin
+        write(f,X[i]:10:3);
+        write(f,' ');
+      end;
+      writeln(f); write(f,gauss:10:3);
+    end
+    else writeln(f,'no solution');
+
+  closefile(f);
+end;
+
+procedure TSLAU.Loadfromtext(FName:string);
+var
+  f : text;
+  i, j, k, k1 : integer;
+begin
+  AssignFile(f, FName);
+  reset(f);
+  k := _size*(_size+1);
+  k1 := 0;
+  for i := 0 to _Size-1 do
+    for j := 0 to _Size do
+      begin
+        read(f,a[i,j]);
+        inc(k1);
+      end;
+end;
+
+{procedure TSLAU.Load(FName:string);
+var
+  i, j : integer;
+  b : byte;
+  h : integer;
+begin
+  InStream := TInStream.Create(FName);
+  h := 0;
+  for i := 0 to _Size-1 do
+    for j := 0 to _Size do
+      begin
+        InStream.GetByte(b);
+        if b = 10 then InStream.GetByte(b);
+        while b in [48..58,ord(',')] do
+          begin
+            h := h*10+b-48;
+            if not InStream.GetByte(b) then break;
+          end;
+        A[i,j] := h;
+        h := 0;
+      end;
+  InStream.Destroy;
+end;
+
+}
+function TSLAU.Gauss : real;
+var
+  dA : array of array of real;
+  i, j, k : integer;
+begin
+  result := -1;
+  setlength(DA, _Size);
+  for i:=0 to _Size-1 do SetLength(DA[i], _Size+1);
+  for i := 0 to _size-1 do
+    for j := 0 to _size do da[i,j] := a[i,j];
+
+
+  //прямой ход
+for i := 0 to _size-1 do
+ begin
+   for j := _size downto 0 do
+    begin
+     if da[i,i] = 0 then exit;
+     dA[i,j] := dA[i,j]/dA[i,i];
+    end;
+   for j := i+1 to _size-1 do
+     for k := _size downto i do
+       dA[j,k] := dA[j,k]-dA[i,k]*dA[j,i];
+ end;
+
+  //обратный ход
+for i := _size-2 downto 0 do
+  for j := i+1 to _size-1 do
+    dA[i,_size] := dA[i,_size]-dA[i,j]*dA[j,_size];
+
+  //получили решение в последнем столбце dA
+for i := 0 to _size-1 do  X[i] := dA[i,_size];
+
+result := calcerror;
+
+end;
+
+
+function  TSLAU.CalcError:real;
+var
+  i, j : integer;
+  b, dx, dx1 : real;
+begin
+  dx := 0;
+
+  for i := 0 to _size-1 do
+   begin
+   b := 0;
+    for j := 0 to _size-1 do
+      b := b + a[i,j]*x[j];
+    dx1 := abs(b-a[i,_size]);
+    if dx1 > dx then dx := dx1;
+   end;
+  result := dx;
+
+end;
+
+
+end.
